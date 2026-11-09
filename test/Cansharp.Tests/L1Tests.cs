@@ -127,6 +127,26 @@ public sealed class L1Tests : IDisposable
     }
 
     [Fact]
+    public void Top_level_statements_synthesize_a_Program_type_with_Main_callable()
+    {
+        // D18: a top-level-statement file (no explicit class) must not vanish — it synthesizes
+        // Program/<Main>$ holding the call sites. This is the microservices Program.cs case.
+        Write("Program.cs", """
+            using System;
+            Console.WriteLine("boot");
+            var x = Compute(2);
+            int Compute(int n) => n * 2;
+            """);
+        var t = Analyze().Application.SymbolTable["Program.cs"].Types;
+        Assert.Contains("Program", t.Keys);
+        var prog = t["Program"];
+        Assert.Equal("class", prog.Kind);
+        var main = prog.Callables!.Values.Single(c => c.Signature.StartsWith("<Main>$"));
+        Assert.NotNull(main.Body);                       // the top-level call sites are captured
+        Assert.All(main.Body!.Values, bn => Assert.Null(bn.Callee));
+    }
+
+    [Fact]
     public void Call_sites_recorded_at_L1_with_null_callee()
     {
         Write("A.cs", "public class A { int X() => 1; int Y() { return X(); } }");

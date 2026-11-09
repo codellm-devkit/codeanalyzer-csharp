@@ -43,6 +43,16 @@ public sealed class SymbolTableBuilder(CanId canId)
             if (node is not null) types[key] = node;
         }
 
+        // D18: top-level statements synthesize a `Program` type with a `<Main>$` callable.
+        // The compiler wraps a top-level-statement file in exactly this shape; without it the
+        // file's entire body (DI wiring, middleware, endpoint mapping) is invisible.
+        var globals = root.Members.OfType<GlobalStatementSyntax>().ToList();
+        if (globals.Count > 0)
+        {
+            var (progKey, progNode) = SynthesizeProgram(globals, moduleId, spans);
+            types[progKey] = progNode;
+        }
+
         return new Module
         {
             Id = moduleId,
@@ -129,6 +139,51 @@ public sealed class SymbolTableBuilder(CanId canId)
             Namespace = sym.ContainingNamespace?.ToDisplayString(),
         };
         return (name, node);
+    }
+
+    // D18: synthesize the compiler's Program/<Main>$ wrapper for a top-level-statement file.
+    private (string key, TypeNode node) SynthesizeProgram(
+        List<GlobalStatementSyntax> globals, string moduleId, SpanFactory spans)
+    {
+        const string typeName = "Program";
+        const string sig = "<Main>$(System.String[])System.Void";
+        string typeId = canId.Type(moduleId, typeName);
+
+        // One synthetic span covering the whole run of top-level statements.
+        var firstLoc = globals[0].GetLocation();
+        var lastLoc = globals[^1].GetLocation();
+        var mainSpan = SynthSpan(firstLoc, lastLoc, spans);
+
+        var body = BuildCallSitesFromNodes(globals, spans);
+
+        var main = new Callable
+        {
+            Id = canId.Member(typeId, sig),
+            Kind = "method",
+            Signature = sig,
+            Span = mainSpan,
+            ReturnType = "System.Void",
+            Modifiers = new List<string> { "static" }, // the synthesized entrypoint
+            Body = body,
+        };
+
+        var node = new TypeNode
+        {
+            Id = typeId,
+            Kind = "class",
+            Span = mainSpan,
+            Modifiers = new List<string> { "synthesized" }, // marks the compiler-synthesized wrapper
+            Callables = new Dictionary<string, Callable> { [sig] = main },
+        };
+        return (typeName, node);
+    }
+
+    private static Schema.Span SynthSpan(
+        Microsoft.CodeAnalysis.Location first, Microsoft.CodeAnalysis.Location last, SpanFactory spans)
+    {
+        var s = spans.From(first);
+        var e = spans.From(last);
+        return new Schema.Span { Start = s.Start, End = e.End, Bytes = new[] { s.Bytes[0], e.Bytes[1] } };
     }
 
     private static string TypeKind(BaseTypeDeclarationSyntax decl, INamedTypeSymbol sym) => decl switch
@@ -277,11 +332,19 @@ public sealed class SymbolTableBuilder(CanId canId)
     {
         SyntaxNode? scope = (SyntaxNode?)body ?? arrow;
         if (scope is null) return null;
+        return BuildCallSitesFromNodes(new[] { scope }, spans);
+    }
 
+    // Shared invocation collector over one or more syntax scopes (used by ordinary callable
+    // bodies and by the D18 synthesized <Main>$ over top-level statements).
+    private static Dictionary<string, BodyNode>? BuildCallSitesFromNodes(
+        IEnumerable<SyntaxNode> scopes, SpanFactory spans)
+    {
         var result = new Dictionary<string, BodyNode>();
         var seenAtPos = new Dictionary<string, int>();
 
-        foreach (var inv in scope.DescendantNodes().OfType<InvocationExpressionSyntax>())
+        foreach (var scope in scopes)
+        foreach (var inv in scope.DescendantNodesAndSelf().OfType<InvocationExpressionSyntax>())
         {
             var loc = inv.GetLocation().GetLineSpan().StartLinePosition;
             string baseKey = CanId.BodyLocal(loc.Line + 1, loc.Character + 1);
