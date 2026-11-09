@@ -22,18 +22,16 @@ public sealed class Analyzer(string version)
         var identity = IdentityResolver.Resolve(opts.Input, opts.Application, opts.Namespace);
         var canId = new CanId(identity.Namespace, identity.Application);
 
-        var loader = new ProjectLoader(opts.Input, opts.SkipTests);
-        var sources = loader.DiscoverSources();
-
-        var assemblyName = identity.Application;
-        var built = new CompilationBuilder().Build(assemblyName, sources);
+        var loaded = new ProjectLoader(opts.Input, opts.SkipTests).Load();
+        var built = new CompilationBuilder().Build(loaded);
         var builder = new SymbolTableBuilder(canId);
 
         var symbolTable = new Dictionary<string, Module>();
         foreach (var file in built.Files)
         {
-            var model = built.Compilation.GetSemanticModel(file.Tree);
-            var module = builder.BuildModule(file, model, assemblyName);
+            var model = built.ModelByFileKey[file.Source.FileKey];
+            // Per-project assembly name on the module (spec D4: `project` field).
+            var module = builder.BuildModule(file, model, file.AssemblyName);
             symbolTable[file.Source.FileKey] = module;
         }
 
