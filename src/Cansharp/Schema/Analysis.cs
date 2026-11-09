@@ -37,6 +37,6 @@ public sealed record AnalysisDocument
 
 public sealed record AnalyzerInfo
 {
-    [JsonPropertyName("name")] public string Name => "codeanalyzer-dotnet";
+    [JsonPropertyName("name")] public string Name => "codeanalyzer-csharp";
     [JsonPropertyName("version")] public required string Version { get; init; }
 }

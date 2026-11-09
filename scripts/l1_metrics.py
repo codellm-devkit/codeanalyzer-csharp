@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# L1 symbol-table metrics for codeanalyzer-dotnet (cansharp).
+# L1 symbol-table metrics for codeanalyzer-csharp (cansharp).
 #
 # Self-validating: reads an emitted analysis.json and compares it against the canonical
 # schema v2 invariants and its own internal consistency. No external oracle, no ground truth

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# eval_l1.sh — L1 evaluation runner for codeanalyzer-dotnet (cansharp).
+# eval_l1.sh — L1 evaluation runner for codeanalyzer-csharp (cansharp).
 #
 # House split (mirrors codeanalyzer-go/scripts/eval_l3.sh): this shell OWNS pass/fail —
 #   * a run that exits non-zero fails the app

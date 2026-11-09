@@ -1,4 +1,4 @@
-# Schema decisions — codeanalyzer-dotnet (`cansharp`)
+# Schema decisions — codeanalyzer-csharp (`cansharp`)
 
 Transcript of the design-loop decisions (see org `.github` specs:
 `codeanalyzer-dotnet.md` D1–D16, and the 2026-11-08 amendment

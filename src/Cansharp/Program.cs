@@ -110,6 +110,6 @@ static AnalysisOptions ParseArgs(string[] args, out bool showHelp)
 }
 
 static string HelpText() =>
-    "cansharp — codeanalyzer-dotnet (C# → canonical CLDK analysis.json)\n" +
+    "cansharp — codeanalyzer-csharp (C# → canonical CLDK analysis.json)\n" +
     "usage: cansharp -i <path> [-o <dir>] [-a 1] [--emit json|neo4j|schema]\n" +
     "               [--application <name>] [--namespace <name>] [--include-tests]\n";
