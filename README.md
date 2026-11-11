@@ -4,14 +4,6 @@ A Roslyn-based static analyzer for C# that emits the canonical CLDK analysis sch
 (`analysis.json` + a Neo4j projection). Distributed on PyPI as `cansharp`; consumed by the
 `csharp` model package in `python-sdk`.
 
-> **Naming.** This analyzer is `codeanalyzer-csharp` — one repo per language. (The original
-> design named it `codeanalyzer-dotnet` for the .NET platform family; that was reversed in
-> favour of a C#-only repo. VB.NET/F#, if ever added, get their own `codeanalyzer-*` repos.)
-
-Design: org `.github` specs (the design spec, originally filed as `codeanalyzer-dotnet.md`,
-D1–D16) and `2026-11-08-dotnet-application-identity.md` (two-segment identity, python-sdk#440).
-Decision transcript: [`.claude/SCHEMA_DECISIONS.md`](.claude/SCHEMA_DECISIONS.md).
-
 ## Build & test
 
 ```sh
