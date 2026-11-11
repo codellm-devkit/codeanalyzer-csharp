@@ -323,9 +323,9 @@ class L1Analyzer:
         out.update(self.K)
         # distributions
         out["callables_per_type"] = callables_dist
-        # decision coverage checklist
+        # decision coverage checklist (descriptive: which constructs this app exercises;
+        # apps need not implement every C# construct, so there is no "complete" rollup)
         out["decision_coverage"] = self.decisions
-        out["decision_coverage_complete"] = all(self.decisions.values())
         # check_failures: nonzero only (the house convention). Clean run => {}.
         out["check_failures"] = {k: v for k, v in self.chk.items() if v}
         return out
