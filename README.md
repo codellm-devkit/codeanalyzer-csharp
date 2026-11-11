@@ -24,6 +24,3 @@ dotnet run --project src/Cansharp -- -i <path> -o /tmp/out \
 # Neo4j projection (Cypher)
 dotnet run --project src/Cansharp -- -i <path> -o /tmp/out --emit neo4j
 ```
-
-Contract: stdout carries only analysis JSON; all diagnostics go to stderr; flag errors exit
-non-zero. `-a` defaults to 1 (only L1 is implemented; `-a 2+` errors).
