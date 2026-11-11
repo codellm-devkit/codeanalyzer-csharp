@@ -12,17 +12,6 @@ Design: org `.github` specs (the design spec, originally filed as `codeanalyzer-
 D1–D16) and `2026-11-08-dotnet-application-identity.md` (two-segment identity, python-sdk#440).
 Decision transcript: [`.claude/SCHEMA_DECISIONS.md`](.claude/SCHEMA_DECISIONS.md).
 
-## Status
-
-**L1 (symbol table) — implemented.** The containment tree to callable depth + `call` nodes
-(`callee: null`), both projections, application-scoped identity (`identity_version: 2`).
-
-- [x] L1 symbol table — `can://<namespace>/<application>/csharp/...`, records/delegates,
-      properties→field+accessors, `ref_kind`, `is_async`/`is_iterator`, UTF-8 byte spans
-- [ ] L2 call graph (`callee` backfill, `call_graph` edges) — next
-- [ ] L3 intraprocedural dataflow — own design session
-- [ ] L4 interprocedural SDG — own design session (needs a points-to oracle)
-
 ## Build & test
 
 ```sh
